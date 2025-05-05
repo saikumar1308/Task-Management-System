@@ -1,0 +1,83 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { setToken } from '@/utils/auth'
+import Link from 'next/link'
+
+export default function SignupPage() {
+  const router = useRouter()
+  const [formData, setFormData] = useState({
+    email: '',
+    username: '',
+    password: '',
+  })
+  const [error, setError] = useState('')
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Signup failed')
+
+      setToken(data.token)
+      router.push('/dashboard')
+    } catch (err: any) {
+      setError(err.message)
+    }
+  }
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className='flex flex-col items-center justify-center bg-white p-6 rounded-xl shadow-md w-full max-w-sm'>
+        <form onSubmit={handleSubmit} className="">
+          <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
+          {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+          <input
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full p-2 border rounded mb-3"
+            type="email"
+            required
+          />
+          <input
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            className="w-full p-2 border rounded mb-3"
+            type="text"
+            required
+          />
+          <input
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full p-2 border rounded mb-4"
+            type="password"
+            required
+          />
+          <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition cursor-pointer">
+            Sign Up
+          </button>
+        </form>
+        <p className="text-center text-sm mt-4">
+          Already have an account? <Link href="/signin" className="text-blue-500 hover:text-blue-600">Sign In</Link>
+        </p>
+      </div>
+    </div>
+  )
+}
