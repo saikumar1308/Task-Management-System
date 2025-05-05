@@ -32,8 +32,12 @@ export default function SignupPage() {
 
       setToken(data.token)
       router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('An unknown error occurred')
+      }
     }
   }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { removeToken, getToken, setToken  } from '@/utils/auth';
+import { removeToken, getToken } from '@/utils/auth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 export default function Navbar() {
   const router = useRouter();
 
-  // const [token, setLocalToken] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {

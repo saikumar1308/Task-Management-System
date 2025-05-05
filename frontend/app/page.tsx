@@ -1,10 +1,8 @@
 "use client"
-import Image from "next/image";
 import Navbar from "@/components/navBar";
 import Footer from "@/components/footer";
 import { useRouter } from "next/navigation";
-// import taskManagement from "@/public/task-management.png";
-
+import Image from "next/image";
 
 export default function Home() {
   const router = useRouter();
@@ -18,7 +16,7 @@ export default function Home() {
           <button className="bg-blue-800 w-50 text-white px-10 py-5 rounded-2xl shadow-xl shadow-blue-800/50 cursor-pointer" onClick={() => router.push('/dashboard')}>Get Started</button>
         </div>
         <div className="flex flex-col items-center justify-center w-150 ">
-          <img src="/task-management-pic.png" alt="image" className="rounded-2xl" />
+          <Image src="/task-management-pic.png" alt="image" className="rounded-2xl" width={500} height={500} />
         </div>
       </div>
       <Footer />

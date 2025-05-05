@@ -28,8 +28,12 @@ export default function LoginPage() {
 
       setToken(data.token)
       router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (error: unknown ) {
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('An unknown error occurred')
+      }
     }
   }
 
@@ -62,7 +66,7 @@ export default function LoginPage() {
           </button>
         </form>
         <p className="text-center text-sm mt-4">
-          Don't have an account? <Link href="/signup" className="text-blue-500 hover:text-blue-600">Sign Up</Link>
+          Do not have an account? <Link href="/signup" className="text-blue-500 hover:text-blue-600">Sign Up</Link>
         </p>
       </div>
     </div>
