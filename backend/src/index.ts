@@ -1,11 +1,21 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import { userRouter } from './routes/user';
+import { taskRouter } from './routes/task';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express()
 
 app.use(express.json())
 
-app.get("/",(req: Request,res: Response) => {
-    res.send("Hiii!!!")
-})
+app.use(cors())
+
+app.use('/api/user',userRouter)
+
+app.use('/api/task',taskRouter)
 
 app.listen(8080)
+
+// export default app
