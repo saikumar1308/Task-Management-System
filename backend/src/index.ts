@@ -12,12 +12,10 @@ app.use(express.json())
 
 app.use(cors())
 
-app.use('/api/user',userRouter)
+app.use('/api/user', userRouter)
 
-app.use('/api/task',taskRouter)
+app.use('/api/task', taskRouter)
 
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server is running");
-  });
-
-// export default app
+});

@@ -1,8 +1,9 @@
 import { Router } from "express"
-import { Request, Response, NextFunction } from 'express';
-import type { RequestHandler } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response } from 'express';
 import { prisma } from "../prisma";
+import { authMiddleware } from "../middleware/auth";
+
+export const taskRouter = Router()
 
 interface TaskBody {
     id: string;
@@ -12,30 +13,7 @@ interface TaskBody {
     priority: string;
     status: string;
     assignedToId?: string;
-}
-
-export const taskRouter = Router()
-
-interface JwtPayload {
-    id: string;
-}
-
-const authMiddleware: RequestHandler = async (req, res, next) => {
-    const token = req.header("Authorization") || "";
-
-    try {
-        const user = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-        if (user) {
-            // @ts-ignore
-            req.userId = user.id;
-            next();
-        }
-    } catch (error) {
-        res.status(401).json({
-            error: "Invalid token"
-        });
-    }
-};
+  }
 
 taskRouter.use(authMiddleware);
 
@@ -59,6 +37,7 @@ taskRouter.post('/', async (req: Request, res: Response) => {
                 priority: body.priority,
                 status: body.status,
                 createdById: userId,
+                assignedToId: body.assignedToId || null,
             }
         })
         res.status(201).json(task);
@@ -124,7 +103,6 @@ taskRouter.delete('/', async (req: Request, res: Response) => {
 })
 
 taskRouter.get('/', async (req: Request, res: Response) => {
-    // const body = req.body as TaskBody & { id: string };
     // @ts-ignore
     const userId = req.userId;
     if (!userId) {

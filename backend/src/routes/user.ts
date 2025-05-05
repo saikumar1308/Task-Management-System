@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { prisma } from '../prisma';
+import { authMiddleware } from '../middleware/auth';
 
 export const userRouter = Router();
 
@@ -58,5 +59,29 @@ userRouter.post('/login', async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error while logging in' });
+  }
+});
+
+userRouter.get('/', authMiddleware, async (req: Request, res: Response) => {
+  // @ts-ignore
+  const userId = req.userId;
+  if (!userId) {
+    res.status(401).json({
+      error: "Unauthorized"
+    });
+    return;
+  }
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+      },
+    });
+    res.json(users);
+  } catch (error) {
+    console.error("Fetch Users error", error);
+    res.status(500).json({ error: 'Error while fetching users' });
   }
 });
