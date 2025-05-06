@@ -175,7 +175,7 @@ export default function DashboardPage({ users }: { users: User[] }) {
                                     className="w-full p-2 border rounded"
                                 >
                                     <option value="">Select User</option>
-                                    {users.map((user: any) => (
+                                    {users.map((user: User) => (
                                         <option key={user.id} value={user.id} className="text-black">
                                             {user.email}
                                         </option>

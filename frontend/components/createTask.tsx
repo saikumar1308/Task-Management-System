@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { getToken } from '@/utils/auth';
 import { User } from 'next-auth';
 
@@ -120,7 +120,7 @@ export default function CreateTaskPage({ users }: { users: User[] }) {
                     <label htmlFor="" className='text-lg font-semibold'>Assign To
                         <select name="assignedToId" value={formData.assignedToId} onChange={handleChange} className="w-full p-2 border rounded">
                             <option value="">Select User</option>
-                            {users.map((user: any) => (
+                            {users.map((user: User) => (
                                 <option key={user.id} value={user.id} className='text-black'>{user.email}</option>
                             ))}
                         </select>
