@@ -14,24 +14,34 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  password String
-  username String
-  tasks Task[] @relation("UserTasks")
-  assigned Task[] @relation("AssignedTasks")
+  id           String         @id @default(uuid())
+  email        String         @unique
+  password     String
+  username     String
+  tasks        Task[]         @relation("UserTasks")
+  assigned     Task[]         @relation("AssignedTasks")
+  Notification Notification[]
 }
 
 model Task {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  dueDate     DateTime
-  priority    String
-  status      String
-  createdBy   User     @relation("UserTasks", fields: [createdById], references: [id])
-  createdById String
-  assignedTo  User?    @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  dueDate      DateTime
+  priority     String
+  status       String
+  createdBy    User     @relation("UserTasks", fields: [createdById], references: [id])
+  createdById  String
+  assignedTo   User?    @relation("AssignedTasks", fields: [assignedToId], references: [id])
   assignedToId String?
-  createdAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
 }
