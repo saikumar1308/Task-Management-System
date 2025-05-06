@@ -1,14 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getToken } from '@/utils/auth';
-export default function CreateTaskPage() {
+import { User } from 'next-auth';
+
+export default function CreateTaskPage({ users }: { users: User[] }) {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         dueDate: '',
         priority: 'LOW',
-        status: 'TODO',
+        status: 'Pending',
+        assignedToId: '',
     })
     const [showModal, setShowModal] = useState(false)
 
@@ -37,6 +40,7 @@ export default function CreateTaskPage() {
             const data = await res.json()
             if (res.ok) {
                 alert('Task created successfully')
+                setShowModal(false)
             } else {
                 alert('Error: ' + data.error)
             }
@@ -63,53 +67,69 @@ export default function CreateTaskPage() {
                 }
             </div>
             {showModal && <form onSubmit={handleSubmit} className="space-y-4">
-                <label htmlFor="" className='text-lg font-semibold'>Title</label>
-                <input
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="Title"
-                    required
-                    className="w-full p-2 border rounded"
-                />
+                <div className='grid grid-cols-2 gap-4'>
+                    <label htmlFor="" className='text-lg font-semibold'>Title
+                        <input
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            placeholder="Title"
+                            required
+                            className="w-full p-2 border rounded"
+                        />
+                    </label>
 
-                <label htmlFor="" className='text-lg font-semibold'>Description</label>
-                <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Description"
-                    required
-                    className="w-full p-2 border rounded"
-                />
+                    <label htmlFor="" className='text-lg font-semibold'>Description
+                        <textarea
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            placeholder="Description"
+                            required
+                            className="w-full p-2 border rounded"
+                        />
+                    </label>
 
-                <label htmlFor="" className='text-lg font-semibold'>Due Date</label>
-                <input
-                    type="datetime-local"
-                    name="dueDate"
-                    value={formData.dueDate}
-                    onChange={handleChange}
-                    required
-                    className="w-full p-2 border rounded"
-                />
+                    <label htmlFor="" className='text-lg font-semibold'>Due Date
+                        <input
+                            type="datetime-local"
+                            name="dueDate"
+                            value={formData.dueDate}
+                            onChange={handleChange}
+                            required
+                            className="w-full p-2 border rounded"
+                        />
+                    </label>
 
-                <label htmlFor="" className='text-lg font-semibold'>Priority</label>
-                <select name="priority" value={formData.priority} onChange={handleChange} className="w-full p-2 border rounded">
-                    <option value="LOW">Low</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HIGH">High</option>
-                </select>
+                    <label htmlFor="" className='text-lg font-semibold'>Priority
+                        <select name="priority" value={formData.priority} onChange={handleChange} className="w-full p-2 border rounded">
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="HIGH">High</option>
+                        </select>
+                    </label>
 
-                <label htmlFor="" className='text-lg font-semibold'>Status</label>
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full p-2 border rounded">
-                    <option value="TODO">To Do</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="DONE">Done</option>
-                </select>
+                    <label htmlFor="" className='text-lg font-semibold'>Status
+                        <select name="status" value={formData.status} onChange={handleChange} className="w-full p-2 border rounded">
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </label>
+
+                    <label htmlFor="" className='text-lg font-semibold'>Assign To
+                        <select name="assignedToId" value={formData.assignedToId} onChange={handleChange} className="w-full p-2 border rounded">
+                            <option value="">Select User</option>
+                            {users.map((user: any) => (
+                                <option key={user.id} value={user.id} className='text-black'>{user.email}</option>
+                            ))}
+                        </select>
+                    </label>
+                </div>
 
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition cursor-pointer"
+                    className="w-35 h-12 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer ml-50"
                 >
                     Create Task
                 </button>
