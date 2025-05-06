@@ -69,6 +69,7 @@ taskRouter.put('/', async (req: Request, res: Response) => {
                 dueDate: body.dueDate,
                 priority: body.priority,
                 status: body.status,
+                assignedToId: body.assignedToId || null,
             }
         })
         res.status(200).json(task);
