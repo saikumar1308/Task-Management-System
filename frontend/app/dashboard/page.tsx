@@ -6,8 +6,9 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { getToken } from "@/utils/auth";
 import { User } from "next-auth";
-function Dashboard() {
+import { TaskProvider } from "@/context/TaskContext";
 
+function Dashboard() {
   const [users, setUsers] = useState<User[]>([])
 
     useEffect(() => {
@@ -26,11 +27,13 @@ function Dashboard() {
     }, []);
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Welcome to your Dashboard</h1>
-      <CreateTask users={users} />
-      <DashboardComp users={users} />
-    </div>
+    <TaskProvider>
+      <div className="p-4">
+        <h1 className="text-xl font-bold">Welcome to your Dashboard</h1>
+        <CreateTask users={users} />
+        <DashboardComp users={users} />
+      </div>
+    </TaskProvider>
   );
 }
 

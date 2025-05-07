@@ -23,7 +23,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full text-grey-900 p-4 flex justify-between items-center">
-      <h1 className="text-2xl font-semibold text-blue-800">
+      <h1 className="text-3xl font-bold text-blue-800">
         <Link href="/">Task Manager</Link>
       </h1>
       <div className='flex items-center gap-10'>

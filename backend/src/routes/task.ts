@@ -116,7 +116,10 @@ taskRouter.get('/', async (req: Request, res: Response) => {
     try {
         const task = await prisma.task.findMany({
             where: {
-                createdById: userId
+                OR:[
+                    { createdById: userId },
+                    { assignedToId: userId }
+                ]
             },
         })
         res.status(200).json(task);

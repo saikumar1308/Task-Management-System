@@ -3,6 +3,8 @@
 import { getToken } from '@/utils/auth';
 import { User } from 'next-auth';
 import { useEffect, useState } from 'react';
+import { useTaskContext } from '@/context/TaskContext';
+import SearchUsers from './searchUsers';
 
 interface Task {
     id: string;
@@ -19,26 +21,28 @@ export default function DashboardPage({ users }: { users: User[] }) {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [userId, setUserId] = useState<string>('');
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const { setRefreshTasks } = useTaskContext();
+
+    const fetchTasks = async () => {
+        const token = await getToken();
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/task`, {
+            method: 'GET',
+            headers: {
+                Authorization: token || '',
+            },
+        });
+        const data = await res.json();
+        const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+        setUserId(payload.id);
+        setTasks(data);
+    };
 
     useEffect(() => {
-        const fetchTasks = async () => {
-
-            const token = await getToken();
-
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/task`, {
-                method: 'GET',
-                headers: {
-                    Authorization: token || '',
-                },
-            });
-            const data = await res.json();
-            const payload = JSON.parse(atob(token?.split('.')[1] || ''));
-            setUserId(payload.id);
-            setTasks(data);
-        };
-
         fetchTasks();
-    }, []);
+        setRefreshTasks(() => fetchTasks);
+    }, [setRefreshTasks]);
 
     const handleEdit = (task: Task) => {
         setEditingTask(task);
@@ -47,13 +51,17 @@ export default function DashboardPage({ users }: { users: User[] }) {
     const handleUpdate = async () => {
         if (!editingTask) return;
         const token = await getToken();
+        const formattedData = {
+            ...editingTask,
+            dueDate: new Date(editingTask.dueDate).toISOString(),
+        };
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/task/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: token || '',
             },
-            body: JSON.stringify(editingTask),
+            body: JSON.stringify(formattedData),
         });
 
         if (res.ok) {
@@ -86,9 +94,13 @@ export default function DashboardPage({ users }: { users: User[] }) {
 
     const now = new Date();
 
-    const assignedTasks = tasks.filter((task) => task.assignedToId === userId);
-    const createdTasks = tasks.filter((task) => task.createdById === userId);
-    const overdueTasks = tasks.filter((task) => new Date(task.dueDate) < now && task.status !== 'DONE');
+    const filteredTasks = tasks.filter(task => 
+        task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const assignedTasks = filteredTasks.filter((task) => task.assignedToId === userId);
+    const createdTasks = filteredTasks.filter((task) => task.createdById === userId);
+    const overdueTasks = filteredTasks.filter((task) => new Date(task.dueDate) < now && task.status !== 'DONE');
 
     const TaskCard = ({ task, onEdit, onDelete }: { task: Task, onEdit: (task: Task) => void, onDelete: (id: string) => void }) => (
         <div className="bg-white rounded-xl shadow-md p-4 border">
@@ -117,8 +129,22 @@ export default function DashboardPage({ users }: { users: User[] }) {
 
     const Section = ({ title, tasks, isVisible, setIsVisible }: { title: string; tasks: Task[]; isVisible: boolean; setIsVisible: (value: boolean) => void }) => (
         <section>
-            <h2 className="text-xl font-bold mb-4 cursor-pointer" onClick={() => setIsVisible(!isVisible)}>{title}</h2>
-            {isVisible && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex  items-center" onClick={() => setIsVisible(!isVisible)}>
+                <h2 className="text-xl font-bold mb-4 cursor-pointer" >{title}</h2>
+                <div className="mb-3">
+                    {isVisible ?
+                        <svg className="w-6 h-6 text-gray-800 cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="m5 15 7-7 7 7" />
+                        </svg>
+                        :
+                        <svg className="w-6 h-6 text-gray-800 cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="m19 9-7 7-7-7" />
+                        </svg>
+                    }
+                </div>
+            </div>
+
+            {(isVisible || searchQuery !== '') && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {tasks.length > 0 ? (
                     tasks.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} />)
                 ) : (
@@ -130,6 +156,22 @@ export default function DashboardPage({ users }: { users: User[] }) {
 
     return (
         <div className="p-6 space-y-12">
+            <div className="max-w-md mx-auto mb-8">
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="Search tasks by title..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="absolute right-3 top-2.5">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
 
             {editingTask && (
                 <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
@@ -169,18 +211,11 @@ export default function DashboardPage({ users }: { users: User[] }) {
                         {users.length > 0 && (
                             <div className="space-y-2">
                                 <label className="text-lg font-semibold">Assign To</label>
-                                <select
-                                    value={editingTask.assignedToId}
-                                    onChange={(e) => setEditingTask({ ...editingTask, assignedToId: e.target.value })}
-                                    className="w-full p-2 border rounded"
-                                >
-                                    <option value="">Select User</option>
-                                    {users.map((user: User) => (
-                                        <option key={user.id} value={user.id} className="text-black">
-                                            {user.email}
-                                        </option>
-                                    ))}
-                                </select>
+                                <SearchUsers
+                                    users={users}
+                                    onUserSelect={(user) => setEditingTask({ ...editingTask, assignedToId: user.id })}
+                                    selectedUserId={editingTask.assignedToId}
+                                />
                             </div>
                         )}
                         <div className="flex justify-end gap-2">

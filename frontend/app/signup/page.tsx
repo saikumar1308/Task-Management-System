@@ -45,38 +45,47 @@ export default function SignupPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className='flex flex-col items-center justify-center bg-white p-6 rounded-xl shadow-md w-full max-w-sm'>
         <form onSubmit={handleSubmit} className="">
-          <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
-          {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-          <input
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mb-3"
-            type="email"
-            required
-          />
-          <input
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mb-3"
-            type="text"
-            required
-          />
-          <input
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full p-2 border rounded mb-4"
-            type="password"
-            required
-          />
-          <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition cursor-pointer">
-            Sign Up
-          </button>
+          <div className='relative'>
+            <div className="absolute top-0 right-0">
+              <Link href={"/"}>
+                <svg className="w-6 h-6 text-gray-800 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18 17.94 6M18 18 6.06 6" />
+                </svg>
+              </Link>
+            </div>
+            <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
+            {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+            <input
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-2 border rounded mb-3"
+              type="email"
+              required
+            />
+            <input
+              name="username"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+              className="w-full p-2 border rounded mb-3"
+              type="text"
+              required
+            />
+            <input
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-2 border rounded mb-4"
+              type="password"
+              required
+            />
+            <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition cursor-pointer">
+              Sign Up
+            </button>
+          </div>
         </form>
         <p className="text-center text-sm mt-4">
           Already have an account? <Link href="/signin" className="text-blue-500 hover:text-blue-600">Sign In</Link>

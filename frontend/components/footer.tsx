@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex space-x-4 mt-2 md:mt-0">
           <a href="#" className="hover:underline">Privacy Policy</a>
           <a href="#" className="hover:underline">Terms of Service</a>
-          <a href="https://github.com/yourusername/task-manager" target="_blank" rel="noopener noreferrer" className="hover:underline">
+          <a href="https://github.com/saikumar1308/Task-Management-System" target="_blank" rel="noopener noreferrer" className="hover:underline">
             GitHub
           </a>
         </div>

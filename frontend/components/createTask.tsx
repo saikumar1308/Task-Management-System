@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { getToken } from '@/utils/auth';
 import { User } from 'next-auth';
+import { useTaskContext } from '@/context/TaskContext';
+import SearchUsers from './searchUsers';
 
 export default function CreateTaskPage({ users }: { users: User[] }) {
     const [formData, setFormData] = useState({
@@ -14,10 +16,15 @@ export default function CreateTaskPage({ users }: { users: User[] }) {
         assignedToId: '',
     })
     const [showModal, setShowModal] = useState(false)
+    const { refreshTasks } = useTaskContext();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const handleUserSelect = (user: User) => {
+        setFormData(prev => ({ ...prev, assignedToId: user.id }))
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -40,7 +47,29 @@ export default function CreateTaskPage({ users }: { users: User[] }) {
             const data = await res.json()
             if (res.ok) {
                 alert('Task created successfully')
+                if (data.assignedToId !== null) {
+                    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notif`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': token || '',
+                        },
+                        body: JSON.stringify({
+                            userId: data.assignedToId,
+                            message: `You have been assigned a task:  ${data.title}`,
+                        }),
+                    })
+                }
                 setShowModal(false)
+                setFormData({
+                    title: '',
+                    description: '',
+                    dueDate: '',
+                    priority: 'LOW',
+                    status: 'Pending',
+                    assignedToId: '',
+                })
+                refreshTasks();
             } else {
                 alert('Error: ' + data.error)
             }
@@ -117,14 +146,15 @@ export default function CreateTaskPage({ users }: { users: User[] }) {
                         </select>
                     </label>
 
-                    <label htmlFor="" className='text-lg font-semibold'>Assign To
-                        <select name="assignedToId" value={formData.assignedToId} onChange={handleChange} className="w-full p-2 border rounded">
-                            <option value="">Select User</option>
-                            {users.map((user: User) => (
-                                <option key={user.id} value={user.id} className='text-black'>{user.email}</option>
-                            ))}
-                        </select>
-                    </label>
+                    <div>
+                        <label className='text-lg font-semibold'>Assign To
+                            <SearchUsers
+                                users={users}
+                                onUserSelect={handleUserSelect}
+                                selectedUserId={formData.assignedToId}
+                            />
+                        </label>
+                    </div>
                 </div>
 
                 <button
