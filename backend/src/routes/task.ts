@@ -2,6 +2,7 @@ import { Router } from "express"
 import { Request, Response } from 'express';
 import { prisma } from "../prisma";
 import { authMiddleware } from "../middleware/auth";
+import { io, connectedUsers } from "../index";
 
 export const taskRouter = Router()
 
@@ -39,7 +40,29 @@ taskRouter.post('/', async (req: Request, res: Response) => {
                 createdById: userId,
                 assignedToId: body.assignedToId || null,
             }
-        })
+        });
+
+        // Send notification if task is assigned to someone
+        if (body.assignedToId) {
+            // Create notification in database
+            await prisma.notification.create({
+                data: {
+                    userId: body.assignedToId,
+                    message: `You have been assigned a new task: ${task.title}`,
+                    taskId: task.id,
+                }
+            });
+
+            // Send socket notification
+            const assigneeSocketId = connectedUsers[body.assignedToId];
+            if (assigneeSocketId) {
+                io.to(assigneeSocketId).emit('taskAssigned', {
+                    message: `You have been assigned a new task: ${task.title}`,
+                    taskId: task.id,
+                });
+            }
+        }
+
         res.status(201).json(task);
     } catch (error) {
         console.error(error);
@@ -71,7 +94,29 @@ taskRouter.put('/', async (req: Request, res: Response) => {
                 status: body.status,
                 assignedToId: body.assignedToId || null,
             }
-        })
+        });
+
+        // Send notification if task is assigned to someone
+        if (body.assignedToId) {
+            // Create notification in database
+            await prisma.notification.create({
+                data: {
+                    userId: body.assignedToId,
+                    message: `You have been assigned a task: ${task.title}`,
+                    taskId: task.id,
+                }
+            });
+
+            // Send socket notification
+            const assigneeSocketId = connectedUsers[body.assignedToId];
+            if (assigneeSocketId) {
+                io.to(assigneeSocketId).emit('taskAssigned', {
+                    message: `You have been assigned a task: ${task.title}`,
+                    taskId: task.id,
+                });
+            }
+        }
+
         res.status(200).json(task);
     } catch (error) {
         console.error(error);

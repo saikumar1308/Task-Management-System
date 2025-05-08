@@ -7,7 +7,7 @@ export const notifRouter = Router();
 notifRouter.use(authMiddleware);
 
 notifRouter.post('/', async (req: Request, res: Response) => {
-    const { message } = req.body;
+    const { message, taskId } = req.body;
     // @ts-ignore
     const userId = req.userId;
     if (!userId) {
@@ -22,6 +22,7 @@ notifRouter.post('/', async (req: Request, res: Response) => {
             data: {
                 userId,
                 message,
+                taskId,
             },
         });
 
@@ -29,6 +30,20 @@ notifRouter.post('/', async (req: Request, res: Response) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error while creating notification' });
+    }
+});
+
+notifRouter.post('/:id/read', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const notification = await prisma.notification.update({
+            where: { id },
+            data: { read: true },
+        });
+        res.json(notification);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error while marking notification as read' });
     }
 });
 

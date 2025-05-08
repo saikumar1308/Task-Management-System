@@ -25,18 +25,25 @@ export default function DashboardPage({ users }: { users: User[] }) {
     const { setRefreshTasks } = useTaskContext();
 
     const fetchTasks = async () => {
-        const token = await getToken();
+        try {
+            const token = await getToken();
+            if (!token) return;
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/task`, {
-            method: 'GET',
-            headers: {
-                Authorization: token || '',
-            },
-        });
-        const data = await res.json();
-        const payload = JSON.parse(atob(token?.split('.')[1] || ''));
-        setUserId(payload.id);
-        setTasks(data);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/task`, {
+                method: 'GET',
+                headers: {
+                    Authorization: token || '',
+                },
+            });
+            const data = await res.json();
+            const payload = JSON.parse(atob(token?.split('.')[1] || ''));
+            setUserId(payload.id);
+            // Ensure data is an array before setting state
+            setTasks(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error('Error fetching tasks:', error);
+            setTasks([]);
+        }
     };
 
     useEffect(() => {

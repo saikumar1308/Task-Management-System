@@ -41,6 +41,7 @@ model Notification {
   id        String   @id @default(uuid())
   message   String
   userId    String
+  taskId    String?
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   read      Boolean  @default(false)
